@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  #pongBoard {
+    position: relative;
+    height: 400px;
+    width: 600px;
+    border: 1px solid black;
+  }
+  .pongPaddle, .pongBall {
+    position: absolute;
+    background: black;
+  }
+  .pongPaddle {
+    height: 80px;
+    width: 15px;
+  }
+  .pongBall {
+    height: 20px;
+    width: 20px;
+    border-radius: 10px;
+  }
+  #scoreBoard {
+    position: relative;
+    height: 40px;
+    width: 600px;
+    margin-top: 10px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div id="pongBoard">
+    <div id="leftPaddle" class="pongPaddle" style="top: 160px;"></div>
+    <div id="rightPaddle" class="pongPaddle" style="top: 160px; left: 585px;"></div>
+    <div id="ball" class="pongBall" style="top: 190px; left: 290px;"></div>
+  </div>
+  <div id="scoreBoard">0 : 0</div>
+
+  <script>
+    var board = document.getElementById("pongBoard");
+    var ball = document.getElementById("ball");
+    var leftPaddle = document.getElementById("leftPaddle");
+    var rightPaddle = document.getElementById("rightPaddle");
+    var scoreBoard = document.getElementById("scoreBoard");
+
+    var ballDX = 2;
+    var ballDY = 2;
+    var leftPaddleDY = 0;
+    var rightPaddleDY = 0;
+    var speed = 2;
+
+    var leftScore = 0;
+    var rightScore = 0;
+
+    function updateScore() {
+      scoreBoard.innerText = leftScore + " : " + rightScore;
+    }
+
+    function animatePong() {
+      var boardHeight = parseInt(window.getComputedStyle(board).getPropertyValue('height'));
+      var boardWidth = parseInt(window.getComputedStyle(board).getPropertyValue('width'));
+      
+      var ballTop = parseInt(window.getComputedStyle(ball).getPropertyValue('top'));
+      var ballLeft = parseInt(window.getComputedStyle(ball).getPropertyValue('left'));
+      var leftPaddleTop = parseInt(window.getComputedStyle(leftPaddle).getPropertyValue('top'));
+      var rightPaddleTop = parseInt(window.getComputedStyle(rightPaddle).getPropertyValue('top'));
+
+      // Mover paletas
+      if(leftPaddleTop > 0 && leftPaddleDY < 0) {
+        leftPaddle.style.top = (leftPaddleTop + leftPaddleDY) + "px";
+      }
+      if(leftPaddleTop < (boardHeight - 80) && leftPaddleDY > 0) {
+        leftPaddle.style.top = (leftPaddleTop + leftPaddleDY) + "px";
+      }
+      if(rightPaddleTop > 0 && rightPaddleDY < 0) {
+        rightPaddle.style.top = (rightPaddleTop + rightPaddleDY) + "px";
+      }
+      if(rightPaddleTop < (boardHeight - 80) && rightPaddleDY > 0) {
+        rightPaddle.style.top = (rightPaddleTop + rightPaddleDY) + "px";
+      }
+
+      // Mover pelota y detectar colisiones
+      if(ballTop <= 0 || ballTop >= boardHeight - 20) {
+        ballDY = -ballDY;
+      }
+
+      if(ballLeft <= 15) {
+        if(ballTop + 10 >= leftPaddleTop && 
+           ballTop + 10 <= leftPaddleTop + 80) {
+          ballDX = -ballDX;
+        } else {
+          // Player on the right scores a point
+          rightScore++;
+          updateScore();
+          ball.style.top = "190px";
+          ball.style.left = "290px";
+          ballDX = 2;
+        }
+      }
+
+      if(ballLeft >= boardWidth - 35) {
+        if(ballTop + 10 >= rightPaddleTop && 
+           ballTop + 10 <= rightPaddleTop + 80) {
+          ballDX = -ballDX;
+        } else {
+          // Player on the left scores a point
+          leftScore++;
+          updateScore();
+          ball.style.top = "190px";
+          ball.style.left = "290px";
+          ballDX = -2;
+        }
+      }
+
+      ball.style.top = (ballTop + ballDY) + "px";
+      ball.style.left = (ballLeft + ballDX) + "px";
+      requestAnimationFrame(animatePong);
+    }
+
+    document.addEventListener('keydown', function(event) {
+      switch(event.code) {
+        case 'KeyW':
+          leftPaddleDY = -speed;
+          break;
+        case 'KeyS':
+          leftPaddleDY = speed;
+          break;
+        case 'ArrowUp':
+          rightPaddleDY = -speed;
+          break;
+        case 'ArrowDown':
+          rightPaddleDY = speed;
+          break;
+      }
+    });
+
+    document.addEventListener('keyup', function(event) {
+      switch(event.code) {
+        case 'KeyW':
+        case 'KeyS':
+          leftPaddleDY = 0;
+          break;
+        case 'ArrowUp':
+        case 'ArrowDown':
+          rightPaddleDY = 0;
+          break;
+      }
+    });
+
+    window.onload = function() {
+      animatePong();
+    }
+  </script>
+</body>
+</html>
